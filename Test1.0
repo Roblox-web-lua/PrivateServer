@@ -1,0 +1,143 @@
+import tkinter as tk
+from tkinter import messagebox
+import time
+import random
+
+class CheatMenu:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Cheat Menu")
+        self.root.configure(bg='black')
+        self.root.geometry("300x200")
+        self.root.resizable(False, False)
+        
+        # Make window always on top and draggable
+        self.root.attributes('-topmost', True)
+        self.root.overrideredirect(True)  # Remove window borders for custom drag
+        
+        # Center on screen initially
+        self.center_window()
+        
+        # Variables for toggles
+        self.hitbox_on = False
+        self.lag_on = False
+        
+        # Drag variables
+        self.drag_start_x = 0
+        self.drag_start_y = 0
+        
+        self.create_widgets()
+        self.show_loading_screen()
+    
+    def center_window(self):
+        self.root.update_idletasks()
+        w = self.root.winfo_width()
+        h = self.root.winfo_height()
+        x = (self.root.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.root.winfo_screenheight() // 2) - (h // 2)
+        self.root.geometry(f"+{x}+{y}")
+    
+    def show_loading_screen(self):
+        # Loading screen overlay
+        loading = tk.Toplevel(self.root)
+        loading.configure(bg='black')
+        loading.geometry("400x300")
+        loading.attributes('-topmost', True)
+        loading.overrideredirect(True)
+        loading.grab_set()  # Modal
+        
+        # Center loading screen
+        loading.update_idletasks()
+        lx = (loading.winfo_screenwidth() // 2) - 200
+        ly = (loading.winfo_screenheight() // 2) - 150
+        loading.geometry(f"+{lx}+{ly}")
+        
+        # Loading label
+        load_label = tk.Label(loading, text="LOADING...", font=("Arial", 24, "bold"),
+                            fg="white", bg="black")
+        load_label.pack(expand=True)
+        
+        # Loading bar simulation
+        progress = tk.Label(loading, text="[" + " "*30 + "]", font=("Arial", 12),
+                          fg="lime", bg="black")
+        progress.pack(pady=20)
+        
+        def animate_loading():
+            for i in range(31):
+                progress.config(text="[" + "█"*i + " "*(30-i) + "]")
+                progress.update()
+                time.sleep(0.15)
+            loading.destroy()
+            self.root.deiconify()  # Show main window
+        
+        # Start loading animation after short delay
+        self.root.after(100, animate_loading)
+        self.root.withdraw()  # Hide main window initially
+    
+    def create_widgets(self):
+        # Title bar for dragging
+        title_bar = tk.Frame(self.root, bg='gray20', height=30)
+        title_bar.pack(fill='x')
+        title_bar.bind("<Button-1>", self.start_drag)
+        title_bar.bind("<B1-Motion>", self.drag_window)
+        
+        close_btn = tk.Button(title_bar, text="✕", command=self.root.quit,
+                            bg='red', fg='white', font=('Arial', 10),
+                            width=3, height=1)
+        close_btn.pack(side='right', padx=5, pady=2)
+        
+        title_label = tk.Label(title_bar, text="CHEAT MENU", font=('Arial', 12, 'bold'),
+                             bg='gray20', fg='white')
+        title_label.pack(side='left', padx=10, pady=5)
+        
+        # Main content frame
+        content = tk.Frame(self.root, bg='black')
+        content.pack(expand=True, fill='both', padx=20, pady=20)
+        
+        # Instant Steal button
+        self.steal_btn = tk.Button(content, text="⚡️ INSTANT STEAL", font=('Arial', 14, 'bold'),
+                                 bg='#00ff00', fg='black', width=20, height=2,
+                                 command=self.instant_steal, relief='raised')
+        self.steal_btn.pack(pady=15)
+        
+        # Hitbox toggle
+        self.hitbox_btn = tk.Button(content, text="📦 Hitbox: OFF", font=('Arial', 12),
+                                  bg='gray40', fg='white', width=18, height=2,
+                                  command=self.toggle_hitbox, relief='raised')
+        self.hitbox_btn.pack(pady=10)
+        
+        # Lag toggle
+        self.lag_btn = tk.Button(content, text="⚡ Lag: OFF", font=('Arial', 12),
+                               bg='gray40', fg='white', width=18, height=2,
+                               command=self.toggle_lag, relief='raised')
+        self.lag_btn.pack(pady=10)
+    
+    def start_drag(self, event):
+        self.drag_start_x = event.x_root - self.root.winfo_x()
+        self.drag_start_y = event.y_root - self.root.winfo_y()
+    
+    def drag_window(self, event):
+        x = event.x_root - self.drag_start_x
+        y = event.y_root - self.drag_start_y
+        self.root.geometry(f"+{x}+{y}")
+    
+    def instant_steal(self):
+        messagebox.showinfo("⚡️", "INSTANT STEAL ACTIVATED!\nAll items collected instantly!")
+    
+    def toggle_hitbox(self):
+        self.hitbox_on = not self.hitbox_on
+        status = "ON" if self.hitbox_on else "OFF"
+        color = '#00ff00' if self.hitbox_on else 'gray40'
+        self.hitbox_btn.config(text=f"📦 Hitbox: {status}", bg=color)
+        print(f"Hitbox {'enabled' if self.hitbox_on else 'disabled'}")
+    
+    def toggle_lag(self):
+        self.lag_on = not self.lag_on
+        status = "ON" if self.lag_on else "OFF"
+        color = '#00ff00' if self.lag_on else 'gray40'
+        self.lag_btn.config(text=f"⚡ Lag: {status}", bg=color)
+        print(f"Lag {'enabled' if self.lag_on else 'disabled'}")
+
+if __name__ == "__main__":
+    app = CheatMenu()
+    app.root.mainloop()
